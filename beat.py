@@ -2,117 +2,65 @@ from struct import pack, unpack
 import random
 import asyncio
 import logging
+from collections import OrderedDict
+from .parts import PING, PONG, message_washing
 
-from .parts import PING, PONG
-
-from .protocols import AsyncWebSocketStreamReaderProtocol
+from .protocols import SocketState, AsyncWebSocketStreamReaderProtocol
 
 
 class RespBeat:
-    """ ping pong """
+    """太监与太监的传话
+    * 在连接建立之后，随时都可以发送Ping帧
+    * 当收到平公公Ping帧的时候,彭公公需要立即返回Pong帧
+    * 两位公公互相传话是因为需要确认双方在线
+    * 平公公说什么,彭公公必须回什么
+    """
 
-    def __int__(self, protocols):
+    def __int__(self, protocols, interval=30, timeout=30):
+        self.interval = interval
+        self.timeout = timeout
+        self.queues = OrderedDict
         self.protocols = AsyncWebSocketStreamReaderProtocol()
 
-    async def ping(self, data=None):
+    async def ping(self, mes=None):
+        """传话太监平公公
+        想说什么就说什么
         """
-        This coroutine sends a ping.
-
-        It returns a :class:`~asyncio.Future` which will be completed when the
-        corresponding pong is received and which you may ignore if you don't
-        want to wait.
-
-        A ping may serve as a keepalive or as a check that the remote endpoint
-        received all messages up to this point::
-
-            pong_waiter = await ws.ping()
-            await pong_waiter   # only if you want to wait for the pong
-
-        By default, the ping contains four random bytes. The content may be
-        overridden with the optional ``data`` argument which must be of type
-        :class:`str` (which will be encoded to UTF-8) or :class:`bytes`.
-        """
-        await self.protocols.ensure_open()
-
-        if data is not None:
-            data = self.protocols.encode_data(data)
+        if mes:
+            message = message_washing(mes)
 
         # Protect against duplicates if a payload is explicitly set.
-        if data in self.pings:
+        if message in self.queues:
             raise ValueError("Already waiting for a pong with the same data")
 
         # Generate a unique random payload otherwise.
-        while data is None or data in self.pings:
-            data = pack('!I', random.getrandbits(32))
+        if message is None or message in self.queues:
+            message = pack('!I', random.getrandbits(32))
 
-        self.pings[data] = asyncio.Future(loop=self.loop)
+        await self.protocols.write_frame(True, PING, message)
 
-        await self.protocols.write_frame(True, PING, data)
-
-        return asyncio.shield(self.pings[data])
-
-    async def pong(self, data=b''):
+    async def pong(self, mes=b''):
+        """回话太监彭公公
+        平公公说什么，彭公公必须回什么
         """
-        This coroutine sends a pong.
-
-        An unsolicited pong may serve as a unidirectional heartbeat.
-
-        The content may be overridden with the optional ``data`` argument
-        which must be of type :class:`str` (which will be encoded to UTF-8) or
-        :class:`bytes`.
-
-        """
-        await self.protocols.ensure_open()
-
-        data = self.protocols.encode_data(data)
-
-        await self.protocols.write_frame(True, PONG, data)
+        message = message_washing(mes)
+        await self.protocols.write_frame(True, PONG, message)
 
     async def keep_alive_ping(self):
-        """Send a Ping frame and wait for a Pong frame at regular intervals.
+        """平公公发出传话并等待彭公公回话
         """
-        if self.ping_interval is None:
-            return
-
         try:
             while True:
-                await asyncio.sleep(self.ping_interval, loop=self.loop)
-
-                # ping() cannot raise ConnectionClosed, only CancelledError:
-                # - If the connection is CLOSING, keepalive_ping_task will be
-                #   canceled by close_connection() before ping() returns.
-                # - If the connection is CLOSED, keepalive_ping_task must be
-                #   canceled already.
+                await asyncio.sleep(self.interval, loop=self.loop)
                 ping_waiter = await self.ping()
-
-                if self.ping_timeout is not None:
-                    try:
-                        await asyncio.wait_for(
-                            ping_waiter, self.ping_timeout, loop=self.loop
-                        )
-                    except asyncio.TimeoutError:
-                        self.fail_connection(1011)
-                        break
-        except asyncio.CancelledError:
-            raise
+                await asyncio.wait_for(ping_waiter, self.timeout, loop=self.loop)
         except Exception as exc:
-            logging.warning("Unexpected exception in keep alive ping task", exc_info=True)
+            logging.warning(exc)
 
     def abort_keep_alive_pings(self):
+        """中止两位公公的传话
         """
-        Raise ConnectionClosed in pending keepalive pings.
-
-        They'll never receive a pong once the connection is closed.
-
-        """
-        assert self.state is SocketState.closed
-        exc = ConnectionClosed(self.close_code, self.close_reason)
+        exc = ConnectionError(self.close_code, self.close_reason)
         exc.__cause__ = self.transfer_data_exc  # emulate raise ... from ...
-        for ping in self.pings.values():
-            ping.set_exception(exc)
-        # if self.pings:
-        #     pings_hex = ', '.join(
-        #         binascii.hexlify(ping_id).decode() or '[empty]'
-        #         for ping_id in self.pings
-        #     )
-        #     plural = 's' if len(self.pings) > 1 else ''
+        for p in self.queues.values():
+            p.set_exception(exc)

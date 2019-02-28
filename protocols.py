@@ -48,7 +48,6 @@ class AsyncWebSocketStreamReaderProtocol(StreamReaderProtocol):
 
         self.connection_lost_waiter = asyncio.Future(loop=loop)
         self.messages = Queue()
-        self.pings = OrderedDict()  # 有序队列
         self.task_transporter = None
         self.task_eunuch = None  # 传话太监
         self.task_close = None
@@ -285,22 +284,6 @@ class AsyncWebSocketStreamReaderProtocol(StreamReaderProtocol):
                         extensions=self.extensions)
         if not self.task_close:
             self.task_close = asyncio.wait(self.close_connection())
-
-    @staticmethod
-    def encode_data(data):
-        """
-        Helper that converts :class:`str` or :class:`bytes` to :class:`bytes`.
-
-        :class:`str` are encoded with UTF-8.
-
-        """
-        # Expect str or bytes, return bytes.
-        if isinstance(data, str):
-            return data.encode('utf-8')
-        elif isinstance(data, bytes):
-            return data
-        else:
-            raise TypeError("data must be bytes or str")
 
     async def wait_for_connection_lost(self):
         """等待TCP连接关闭或self.close_timeout。
