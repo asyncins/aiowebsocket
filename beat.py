@@ -20,7 +20,6 @@ class RespBeat:
         self.interval = interval
         self.timeout = timeout
         self.queues = OrderedDict
-        self.protocols = AsyncWebSocketStreamReaderProtocol()
 
     async def ping(self, mes=None):
         """传话太监平公公

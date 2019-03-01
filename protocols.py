@@ -13,16 +13,15 @@ from .exceptions import *
 
 
 class SocketState(IntEnum):
-    connecting, opened, closing, closed = (0, 1, 2, 3)
+    zero, connecting, opened, closing, closed = (0, 1, 2, 3, 4)
 
 
 class AsyncWebSocketStreamReaderProtocol(StreamReaderProtocol):
     def __init__(self, host, port, protocol_name, ping_interval,
                  ping_timeout, timeout, maximum, queue_max, write_size,
                  read_size, loop, *args):
-        self.host = host
+        self.host = host,
         self.port = port,
-        self.protocol_name = protocol_name
         self.ping_interval = ping_interval
         self.ping_timeout = ping_timeout
         self.timeout = timeout
@@ -31,9 +30,9 @@ class AsyncWebSocketStreamReaderProtocol(StreamReaderProtocol):
         self.write_size = write_size
         self.read_size = read_size
         self.loop = loop
-        self.state = SocketState.connecting
-        self.reader = None
-        self.writer = None
+        self.state = SocketState.zero
+        self.reader: asyncio.StreamReader
+        self.writer: asyncio.StreamWriter
         self.path = None
         self.request_headers = None
         self.response_headers = None
@@ -96,7 +95,7 @@ class AsyncWebSocketStreamReaderProtocol(StreamReaderProtocol):
 
     async def receive(self):
         while len(self.messages) <= 0:
-            await self.transfer_data_task
+            await self.trans
         message = self.messages.popleft()
         return message
 
@@ -254,7 +253,7 @@ class AsyncWebSocketStreamReaderProtocol(StreamReaderProtocol):
         raise ConnectionError("WebSocket connection isn't established yet")
 
     async def transfer_data(self):
-        """读取消息并将其放入队列。
+        """读取消息并将其放入消息队列。
         """
         try:
             while True:
@@ -309,11 +308,10 @@ class AsyncWebSocketStreamReaderProtocol(StreamReaderProtocol):
     def eof_received(self):
         """收到EOF时关闭transport
         """
-        super().eof_received()
-        return
+        return super().eof_received()
 
     def connection_lost(self, exc):
-        """连接关闭
+        """连接丢失
         """
         self.state = SocketState.closed
         if not self.close_code:

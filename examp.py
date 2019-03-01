@@ -7,9 +7,15 @@ async def transfer(val):
 
 
 async def tra():
-    task = asyncio.create_task(transfer(5))
-    # task.cancel()
+    task = asyncio.Task(transfer(5))
+    # connection_lost_waiter = asyncio.Future()
+    # # connection_lost_waiter.set_result(None)
+    # res = await connection_lost_waiter
+    # if connection_lost_waiter.done():
+    #     print('done')
+    # print(res)
 
 
 if __name__ == '__main__':
+
     asyncio.get_event_loop().run_until_complete(tra())
