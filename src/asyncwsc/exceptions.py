@@ -1,7 +1,7 @@
 from .parts import CTRL_CODE
 __all__ = ["UnverifiedError", "StatusCodeError", "UnKnownError",
            "PayloadError", "FrameError", "ConnectionClosed",
-           "CLOSE_CODE"]
+           "CLOSE_CODE", "ProtocolError"]
 
 
 class UnverifiedError(Exception):
@@ -9,19 +9,23 @@ class UnverifiedError(Exception):
 
 
 class StatusCodeError(Exception):
-    """ Exception raised when unverified """
+    """ Exception raised when x """
 
 
 class UnKnownError(Exception):
-    """ Exception raised when unverified """
+    """ Exception raised when x """
 
 
 class PayloadError(Exception):
-    """ Exception raised when unverified """
+    """ Exception raised when x """
 
 
 class FrameError(Exception):
-    """ Exception raised when unverified """
+    """ Exception raised when x """
+
+
+class ProtocolError(Exception):
+    """ Exception raised when x """
 
 
 class ConnectionClosed(Exception):

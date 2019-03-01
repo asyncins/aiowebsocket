@@ -1,19 +1,11 @@
 import logging
 import asyncio
-import binascii
-import random
-from struct import pack, unpack
-from asyncio import StreamReaderProtocol, StreamReader, Lock, Queue, StreamWriter
-from enum import IntEnum
-from collections import abc
-
+from asyncio import StreamReaderProtocol, StreamReader, Lock, StreamWriter
+from . import messages_queue
 from .freams import Frames
-from .parts import CLOSE, TEXT, BINARY, CONT, PING, PONG
 from .exceptions import *
-
-
-class SocketState(IntEnum):
-    zero, connecting, opened, closing, closed = (0, 0, 1, 2, 3)
+from .enumerations import *
+from .parts import character_convert
 
 
 class AsyncStreamReaderProtocol(StreamReaderProtocol):
@@ -31,10 +23,12 @@ class AsyncStreamReaderProtocol(StreamReaderProtocol):
         self.task_close = None
         self.reader = StreamReader
         self.writer = StreamWriter
+        self.messages_queue = messages_queue
         self.extensions = []
         self._drain_lock = Lock()
         self.write_size = write_size
         self.read_size = read_size
+        self.frames = Frames()
         self.loop = loop if not loop else asyncio.get_event_loop()
 
         stream_reader = asyncio.StreamReader(limit=self.read_size // 2, loop=loop)
@@ -58,24 +52,40 @@ class AsyncStreamReaderProtocol(StreamReaderProtocol):
         """当连接丢失或关闭时调用"""
         self.state = SocketState.closed
         if not self.close_code:
-            self.close_code = 1006
+            self.close_code = StatusCode.abnormal
         # 关闭前处理：在挂起的keep alive ping中引发connection closed。
         self.abort_keepalive_pings()
         super().connection_lost(exc)
 
-    async def connection_fail(self, code=1006, reason='', ):
+    async def connection_fail(self, code=StatusCode.abnormal, reason=''):
         """ 连接失败,需要发起连接关闭操作。关闭时需要处理以下事项：
         """
-        if self.task_trans:  # 停止所有数据的传入传出
+        if self.task_trans:  # 如果有消息接收任务则需要先取消
             self.task_trans.cancel()
-        if code != 1006 and self.state is SocketState.opened:
-            frame_data = Frames.serialize_close_frame(code, reason)
+        if code is not StatusCode.abnormal and self.state is SocketState.opened:
+            code, message = self.frames.serialize_close_frame(code, reason)
             self.state = SocketState.closing
-            frame = Frames(True, CLOSE, frame_data)
-            frame.write(self.writer.write, mask=self.is_client,
-                        extensions=self.extensions)
-        if not self.task_close:
-            self.task_close = asyncio.wait(self.close_connection())
+            self.frames.write(fin=True, code=code, message=message)
+        if not self.task_close:  # 如果没有连接关闭的任务，则创建用于关闭连接的任务
+            await self.close_connection()
+            # self.task_close = asyncio.Task(self.close_connection())
+
+    async def close_connection(self) -> None:
+        """当握手成功后需要等待传输完成后关闭TCP
+        握手成功前或握手失败则意味着没有传输，不需要等待
+        """
+        if self.task_trans:  # 如果有消息接收任务则需要先取消
+            self.task_trans.cancel()
+
+        if self.task_eunuch:  # 撤回传话太监
+            self.task_eunuch.cancel()
+
+        if self.writer.can_write_eof():  # 刷新缓冲的写入数据后，停止流的写入。
+            self.writer.write_eof()
+
+        # 关闭写入与传输
+        self.writer.close()
+        self.writer.transport.abort()
 
     # def data_received(self, data: bytes):
     #     pass
@@ -96,9 +106,9 @@ class AsyncStreamReaderProtocol(StreamReaderProtocol):
 
     async def receive(self):
         """ 从队列中取出一条信息 """
-        while len(self.messages) <= 0:
+        while len(self.messages_queue) <= 0:
             await self.task_trans
-        message = self.messages.popleft()
+        message = self.messages_queue.get()
         return message
 
     async def transfer_data(self):
@@ -108,11 +118,36 @@ class AsyncStreamReaderProtocol(StreamReaderProtocol):
                 message = await self.read_message()
                 if message is None:  # 接收到闭合帧时退出循环。
                     break
-                self.messages.append(message)
+                self.messages_queue.append(message)
         except Exception as exc:
             logging.warning(exc)
-            await self.connection_fail(code=1011)
+            await self.connection_fail(code=StatusCode.internal)
 
     async def read_message(self):
-        pass
+        """从连接中读取单个消息。
+        如果消息是分段的，则重新组装数据帧。
+        结束握手开始时返回None"""
+        frame = await self.read_frame(max_size=self.max_size)
+        if not frame:
+            return None
+        if frame.code == OperationCode.text.value:
+            text = True
+        elif frame.code == OperationCode.binary.value:
+            text = False
+        else:
+            raise ProtocolError("Unexpected OperationCode")
+        if frame.fin:
+            return frame.data.decode("utf-8") if text else frame.data
 
+
+class ClientProtocol(AsyncStreamReaderProtocol):
+    """  """
+    def __init__(self):
+        self.writer = StreamWriter
+
+    def construct_header(self, resource: str = '/', header: bytes = b''):
+        if header:
+            header = character_convert(header)
+        else:
+            header = b"GET {resource} HTTP/1.1\r\n".format(resource=resource)
+        self.writer.write(header)

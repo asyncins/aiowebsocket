@@ -21,3 +21,11 @@ def apply_mask(data, mask):
     if len(mask) != 4:
         raise ValueError("mask must contain 4 bytes")
     return bytes(b ^ m for b, m in zip(data, cycle(mask)))
+
+
+def character_convert(character):
+    if isinstance(character, bytes):
+        return character
+    if isinstance(character, str):
+        return character.encode('utf-8')
+    raise ValueError('character must bu str or bytes')
