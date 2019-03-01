@@ -1,7 +1,7 @@
 from .parts import CTRL_CODE
 __all__ = ["UnverifiedError", "StatusCodeError", "UnKnownError",
            "PayloadError", "FrameError", "ConnectionClosed",
-           "CLOSE_CODE", "ProtocolError"]
+           "CLOSE_CODE", "ProtocolError", "MultipleValuesError"]
 
 
 class UnverifiedError(Exception):
@@ -81,3 +81,16 @@ CLOSE_CODE = {
     1011: "unexpected error",
     1015: "TLS failure [internal]",
 }
+
+
+class MultipleValuesError(LookupError):
+    """
+    Exception raised when :class:`Headers` has more than one value for a key.
+
+    """
+
+    def __str__(self) -> str:
+        # Implement the same logic as KeyError_str in Objects/exceptions.c.
+        if len(self.args) == 1:
+            return repr(self.args[0])
+        return super().__str__()
