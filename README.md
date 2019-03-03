@@ -8,6 +8,12 @@ asyncwsc(Async WebSocket Client) 是一个遵循 WebSocket 规范的异步 WebSo
 因为它基于 asyncio，全程异步
 ```
 
+# 安装
+
+```
+# 明日打包，上传pypi
+```
+
 # 使用示例(ws 协议 开发版)
 
 ```
