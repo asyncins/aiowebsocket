@@ -4,6 +4,7 @@ import logging
 from struct import pack, unpack
 from itertools import cycle
 from enumerations import *
+from exceptions import FrameError
 
 
 class Frames:
@@ -16,7 +17,7 @@ class Frames:
     def message_mask(message: bytes, mask):
         """掩码操作"""
         if len(mask) != 4:
-            raise ValueError("mask must contain 4 bytes")
+            raise FrameError("The 'mask' must contain 4 bytes")
         return bytes(b ^ m for b, m in zip(message, cycle(mask)))
 
     async def pong(self, message: bytes = b''):
@@ -34,7 +35,7 @@ class Frames:
             elif code is CtrlCode.close.value:
                 await self.receive_close()
             else:
-                raise ValueError('Invalid operation code.')
+                raise FrameError('Invalid operation code.')
 
     async def unpack_frame(self, mask=False, max_size=None):
         """数据帧解包
@@ -52,7 +53,7 @@ class Frames:
         code = head1 & 0b00001111
 
         if (True if head2 & 0b10000000 else False) != mask:
-            raise ValueError("Incorrect masking")
+            raise FrameError("Incorrect masking")
 
         length = head2 & 0b01111111
         if length == 126:
@@ -62,7 +63,7 @@ class Frames:
             message = await reader(8)
             length, = unpack('!Q', message)
         if max_size is not None and length > max_size:
-            raise ValueError("Message length is too long)".format(length, max_size))
+            raise FrameError("Message length is too long)".format(length, max_size))
         if mask:
             mask_bits = await reader(4)
         message = self.message_mask(message, mask_bits) if mask else await reader(length)

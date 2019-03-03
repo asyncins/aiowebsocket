@@ -1,10 +1,7 @@
-"""WebSocket Operation Code and Frame
-    https://tools.ietf.org/html/rfc6455#section-5.5
-"""
-
-__all__ = ['SocketState', 'StatusCode', 'OperationCode', 'CtrlCode', 'CloseCode']
-
 from enum import IntEnum
+
+
+__all__ = ['SocketState', 'OperationCode', 'CtrlCode', 'CloseCode']
 
 
 CloseCode = [1000, 1001, 1002, 1003, 1007, 1008, 1009, 1010, 1011]
@@ -12,11 +9,6 @@ CloseCode = [1000, 1001, 1002, 1003, 1007, 1008, 1009, 1010, 1011]
 
 class SocketState(IntEnum):
     zero, connecting, opened, closing, closed = (0, 0, 1, 2, 3)
-
-
-class StatusCode(IntEnum):
-    """ 状态码及含义 https://github.com/asyncins/asyncwsc """
-    normal, going, protocol_error, not_status, abnormal, internal = (1000, 1001, 1002, 1005, 1006, 1011)
 
 
 class OperationCode(IntEnum):

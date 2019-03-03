@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from asyncio import Queue
 
 from freams import Frames
@@ -8,7 +9,7 @@ from parts import remote_url
 
 
 class Connect:
-    """ 掌管连接 """
+    """ 司职连接 """
 
     def __init__(self, uri: str, timeout: int = 20, read_timeout: int = 120):
         self.uri = uri
@@ -26,10 +27,11 @@ class Connect:
         向服务端发送关闭帧
         召唤雨化田公公
          """
-        if self.state is not SocketState.opened.value:
-            raise ConnectionError('SocketState is {_}, can not close.'.format(_=self.state))
+        if self.state is SocketState.closed.value:
+            raise ConnectionError('SocketState is closed, can not close.')
+        if self.state is SocketState.closing:
+            logging.warning('SocketState is closing')
         await self.converse.send(message=b'', code=CtrlCode.close.value)
-        await self._eunuch_rain()
 
     async def create_connection(self):
         """ 创建连接
@@ -51,12 +53,6 @@ class Connect:
         self.converse = Converse(reader, writer)
         self.state = SocketState.opened.value
 
-    async def _eunuch_rain(self):
-        """ 雨化田 负责收尾工作
-        关闭/取消其他的服务/任务
-        """
-        print('wait other operation end')
-
     @property
     def manipulator(self):
         return self.converse
@@ -74,7 +70,7 @@ class Connect:
 
 
 class Converse:
-    """ 与服务端进行友好交流 """
+    """ 司职通信交流 """
     def __init__(self, reader: object, writer: object, maxsize: int = 2**16):
         self.reader = reader
         self.writer = writer
@@ -84,6 +80,12 @@ class Converse:
     async def send(self, message: bytes, fin: bool = True,
                    code: int = OperationCode.binary.value):
         """ 向服务端发送消息 """
+        if isinstance(message, str):
+            message = message.encode('utf-8')
+        if isinstance(message, bytes):
+            message = message
+        else:
+            raise ValueError('Message must be str or bytes,not {mst}'.format(mst=type(message)))
         await self.frame.write(fin=fin, code=code, message=message)
 
     async def receive(self):
