@@ -1,7 +1,66 @@
 # asyncwsc
-Async WebSocket Client
+asyncwsc(Async WebSocket Client) 是一个遵循 WebSocket 规范的异步 WebSocket 客户端，它具有轻(代码仅 30+k)和快(基于 asyncio，全程异步)这两个特点。
 
-WebSocket Code [click](https://tools.ietf.org/html/rfc6455#section-7.4.1)
+# 使用示例(开发版)
+
+```
+# examples.py
+import asyncio
+from converses import Connect
+from datetime import datetime
+
+
+async def startup(uri):
+    async with Connect(uri) as connect:
+        converse = connect.manipulator
+        message = b'Async WebSocket Client'
+        while True:
+            await converse.send(message)
+            print('{time}-Client send: {message}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message=message))
+            mes = await converse.receive()
+            print('{time}-Client receive: {rec}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), rec=mes))
+
+
+if __name__ == '__main__':
+    remote = 'ws://echo.websocket.org'
+    asyncio.get_event_loop().run_until_complete(startup(remote))
+
+```
+
+# WSS
+wss 与 ws 的关系就像是 HTTPS 和 HTTP 一样，如果需要使用 wss 协议，只需要在连接时添加 ssl=True 即可：
+
+```
+
+```
+
+# 开发说明
+在开发 asyncwsc 库之前，我参考了 websocket-client 和 websockets 这两个库，在阅读过源码以及使用过后觉得 WebSocket 的连接应该与这两个库一样方便，但是在速度和代码结构上还可以更清晰，所以在完全不懂 WebSocket 的情况下通过阅读、调试源码以及翻阅资料：
+
+* Python 网络和进程间通信 https://docs.python.org/3/library/ipc.html
+* WebSocket 规范 https://tools.ietf.org/html/rfc6455#section-1.2
+* websocket-client https://github.com/websocket-client/websocket-client
+* WebSockets https://github.com/aaugustin/websockets
+* Python Web学习笔记之WebSocket 通信过程与实现 https://www.cnblogs.com/JetpropelledSnake/p/9033064.html#_label1
+* python---websocket的使用 https://www.cnblogs.com/ssyfj/p/9245150.html
+
+最终用了 7 天时间完成 asyncwsc 库的设计和开发。下图是 asyncwsc 库文件结构以及类的设计图：
+
+![images](https://github.com/asyncins/asyncwsc/blob/master/images/asyncwsc-class.png)
+
+相比 websockets 库的结构，asyncwsc 文件结构非常清晰，并且代码量很少。由于 websockets 库用的是 asyncio 旧语法，并且通过 StreameProtocol
+协议，实现自定义协议，加上功能设计不明确，所以导致它的结构比较混乱。整个 websockets 库的源码图我没有画出，但是在调试时候有绘制改进图，StreameProtocol 协议（改进草图）类似下图：
+
+
+
+
+
+
+# WebSocket 及协议相关知识
+
+WebSocket status Code [tools.ietf.org](https://tools.ietf.org/html/rfc6455#section-7.4.1)
 
 状态码 | 名称 |  含义描述  
 -|-|-
