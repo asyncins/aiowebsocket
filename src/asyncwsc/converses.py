@@ -11,8 +11,9 @@ from parts import remote_url
 class Connect:
     """ 司职连接 """
 
-    def __init__(self, uri: str, timeout: int = 20, read_timeout: int = 120):
+    def __init__(self, uri: str, timeout: int = 20, read_timeout: int = 120, ssl=False):
         self.uri = uri
+        self.ssl = ssl
         self.hands = None
         self.reader = None
         self.writer = None
@@ -42,7 +43,7 @@ class Connect:
         if self.state is not SocketState.zero.value:
             raise ConnectionError('Connection is already exists.')
         remote = porn, host, port, resource, users = remote_url(self.uri)
-        reader, writer = await asyncio.open_connection(host=host, port=port)
+        reader, writer = await asyncio.open_connection(host=host, port=port, ssl=self.ssl)
         self.reader = reader
         self.writer = writer
         self.hands = HandShake(remote, reader, writer)

@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 async def startup(uri):
-    async with Connect(uri) as connect:
+    async with Connect(uri, ssl=True) as connect:
         converse = connect.manipulator
         message = b'Async WebSocket Client'
         while True:
@@ -17,5 +17,5 @@ async def startup(uri):
 
 
 if __name__ == '__main__':
-    remote = 'ws://echo.websocket.org'
+    remote = 'wss://echo.websocket.org'
     asyncio.get_event_loop().run_until_complete(startup(remote))

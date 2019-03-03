@@ -1,6 +1,11 @@
 # asyncwsc
-asyncwsc(Async WebSocket Client) 是一个遵循 WebSocket 规范的异步 WebSocket 客户端，它具有轻(代码仅 30+k)和快(基于 asyncio，全程异步)这两个特点。
-
+asyncwsc(Async WebSocket Client) 是一个遵循 WebSocket 规范的异步 WebSocket 客户端，它具有轻和快这两个特点。
+```
+什么说它轻？
+因为它代码仅 30 kb
+为什么说它快？
+因为它基于 asyncio，全程异步
+```
 # 使用示例(开发版)
 
 ```
@@ -33,6 +38,27 @@ if __name__ == '__main__':
 wss 与 ws 的关系就像是 HTTPS 和 HTTP 一样，如果需要使用 wss 协议，只需要在连接时添加 ssl=True 即可：
 
 ```
+import asyncio
+from converses import Connect
+from datetime import datetime
+
+
+async def startup(uri):
+    async with Connect(uri, ssl=True) as connect:
+        converse = connect.manipulator
+        message = b'Async WebSocket Client'
+        while True:
+            await converse.send(message)
+            print('{time}-Client send: {message}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message=message))
+            mes = await converse.receive()
+            print('{time}-Client receive: {rec}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), rec=mes))
+
+
+if __name__ == '__main__':
+    remote = 'wss://echo.websocket.org'
+    asyncio.get_event_loop().run_until_complete(startup(remote))
 
 ```
 
