@@ -1,3 +1,4 @@
+![images](https://github.com/asyncins/asyncwsc/blob/master/images/asyncwsclogo_gaitubao_com_169x169.jpg)
 # asyncwsc
 asyncwsc(Async WebSocket Client) 是一个遵循 WebSocket 规范的异步 WebSocket 客户端，它具有轻和快这两个特点。
 ```
@@ -6,7 +7,6 @@ asyncwsc(Async WebSocket Client) 是一个遵循 WebSocket 规范的异步 WebSo
 为什么说它快？
 因为它基于 asyncio，全程异步
 ```
-![images](https://github.com/asyncins/asyncwsc/blob/master/images/asyncwsc-logo.jpg)
 
 # 使用示例(ws 协议 开发版)
 
