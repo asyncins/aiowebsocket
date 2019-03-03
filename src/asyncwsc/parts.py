@@ -1,31 +1,26 @@
-from itertools import cycle
+from urllib.parse import urlparse
+from collections import namedtuple
 
-DATA_CODE = CONT, TEXT, BINARY = 0x00, 0x01, 0x02
-CTRL_CODE = CLOSE, PING, PONG = 0x08, 0x09, 0x0A
+REMOTE = namedtuple('REMOTE', ['porn', 'host', 'port', 'resource', 'users'])
 
 
-def message_washing(data: bytes):
+def remote_url(uri: str):
+    """通过拆解uri获得连接信息,对信息进行基本校验
+    :param uri:'ws://exam.com'
+    :return:class-> REMOTE
+    :raise: exceptions.Unverified
     """
-    """
-    if isinstance(data, str):
-        return data.encode('utf-8')
-    elif isinstance(data, bytes):
-        return data
-    else:
-        raise TypeError("Message must be bytes or str")
-
-
-def apply_mask(data, mask):
-    """Apply masking to websocket message.
-    """
-    if len(mask) != 4:
-        raise ValueError("mask must contain 4 bytes")
-    return bytes(b ^ m for b, m in zip(data, cycle(mask)))
-
-
-def character_convert(character):
-    if isinstance(character, bytes):
-        return character
-    if isinstance(character, str):
-        return character.encode('utf-8')
-    raise ValueError('character must bu str or bytes')
+    uri = urlparse(uri)
+    try:
+        porn = uri.scheme  # protocol name,example: http ws wss https ftp
+        host = uri.hostname
+        port = uri.port or (443 if porn == 'wss' else 80)
+        users = None
+        resource = uri.path or '/'
+        if uri.query:
+            resource += '?' + uri.query
+        if uri.username or uri.password:
+            users = (uri.username, uri.password)
+    except AssertionError as exc:
+        raise ValueError("The '{uri}' unverified".format(uri=uri)) from exc
+    return REMOTE(porn, host, port, resource, users)

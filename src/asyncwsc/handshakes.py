@@ -1,153 +1,60 @@
+import re
+import random
+import base64
+from asyncio import StreamWriter, StreamReader
 from urllib.parse import urlparse
 from collections import namedtuple
-from .exceptions import UnverifiedError
+
+_value_re = re.compile(rb"[\x09\x20-\x7e\x80-\xff]*")
 
 
-WebSocketURI = namedtuple('WebSocketURI', ['porn', 'host', 'port', 'resource', 'users'])
-
-
-class Headers:
-    def __int__(self):
-        pass
+class HandShake:
+    def __init__(self, remote, reader, writer, headers=None):
+        self.remote = remote
+        self.write = writer
+        self.reader = reader
+        self.headers = headers
 
     @staticmethod
-    def uri_washing(uri):
-        """Parse and validates the uri
-        :param uri: a WebSocket URI,like:'ws://exam.com'
-        :return:class-> WebSocketURI
-        :raise: exceptions.Unverified
-        """
-        uri = urlparse(uri)
-        try:
-            porn = uri.scheme  # protocol name
-            host = uri.hostname
-            port = uri.port or (443 if porn == 'wss' else 80)
-            users = None
-            resource = uri.path or '/'
-            if uri.query:
-                resource += '?' + uri.query
-            if uri.username or uri.password:
-                users = (uri.username, uri.password)
-        except AssertionError as exc:
-            raise UnverifiedError("The '{uri}' unverified".format(uri=uri)) from exc
-        return WebSocketURI(porn, host, port, resource, users)
+    def shake_headers(host: str, port: int, resource: str = '/',
+                      version: int = 13, headers: list = []):
+        """握手时所用的头信息"""
+        if headers:
+            return '\r\n'.join(headers)  # 允许使用自定义头信息
 
+        bytes_key = bytes(random.getrandbits(8) for _ in range(16))
+        key = base64.b64encode(bytes_key).decode()
+        headers = ['GET {resource} HTTP/1.1'.format(resource=resource),
+                   'Host: {host}:{port}'.format(host=host, port=port),
+                   'Upgrade: websocket',
+                   'Connection: Upgrade',
+                   'User-Agent: Python/3.7 websockets/7.0',
+                   'Sec-WebSocket-Key: {key}'.format(key=key),
+                   'Sec-WebSocket-Protocol: chat, superchat',
+                   'Sec-WebSocket-Version: {version}'.format(version=version),
+                   '\r\n']
+        return '\r\n'.join(headers)
 
-def parse_list(
-    parse_item: Callable[[str, int, str], Tuple[T, int]],
-    header: str,
-    pos: int,
-    header_name: str,
-) -> List[T]:
-    """
-    Parse a comma-separated list from ``header`` at the given position.
+    async def shake_(self):
+        porn, host, port, resource, users = self.remote
+        handshake_info = self.shake_headers(host=host, port=port,
+                                            resource=resource, headers=self.headers)
+        self.write.write(data=handshake_info.encode())
 
-    This is appropriate for parsing values with the following grammar:
+    async def shake_result(self):
+        header = []
+        for _ in range(2**8):
+            result = await self.reader.readline()
+            header.append(result)
+            if result == b'\r\n':
+                break
+        if not header:
+            raise ValueError('Not Response')
+        protocols, socket_code = header[0].decode('utf-8').split()[:2]
+        if protocols != "HTTP/1.1":
+            raise ValueError("Unsupported HTTP version: %r" % protocols)
+        socket_code = int(socket_code)
+        if not 100 <= socket_code < 1000:
+            raise ValueError("Unsupported HTTP status code: %d" % socket_code)
+        return socket_code
 
-        1#item
-
-    ``parse_item`` parses one item.
-
-    ``header`` is assumed not to start or end with whitespace.
-
-    (This function is designed for parsing an entire header value and
-    :func:`~websockets.http.read_headers` strips whitespace from values.)
-
-    Return a list of items.
-
-    Raise :exc:`~websockets.exceptions.InvalidHeaderFormat` on invalid inputs.
-
-    """
-    # Per https://tools.ietf.org/html/rfc7230#section-7, "a recipient MUST
-    # parse and ignore a reasonable number of empty list elements"; hence
-    # while loops that remove extra delimiters.
-
-    # Remove extra delimiters before the first item.
-    while peek_ahead(header, pos) == ",":
-        pos = parse_OWS(header, pos + 1)
-
-    items = []
-    while True:
-        # Loop invariant: a item starts at pos in header.
-        item, pos = parse_item(header, pos, header_name)
-        items.append(item)
-        pos = parse_OWS(header, pos)
-
-        # We may have reached the end of the header.
-        if pos == len(header):
-            break
-
-        # There must be a delimiter after each element except the last one.
-        if peek_ahead(header, pos) == ",":
-            pos = parse_OWS(header, pos + 1)
-        else:
-            raise InvalidHeaderFormat(header_name, "expected comma", header, pos)
-
-        # Remove extra delimiters before the next item.
-        while peek_ahead(header, pos) == ",":
-            pos = parse_OWS(header, pos + 1)
-
-        # We may have reached the end of the header.
-        if pos == len(header):
-            break
-
-    # Since we only advance in the header by one character with peek_ahead()
-    # or with the end position of a regex match, we can't overshoot the end.
-    assert pos == len(header)
-
-    return items
-
-
-def parse_connection(header: str) -> List[ConnectionOption]:
-    """
-    Parse a ``Connection`` header.
-
-    Return a list of connection options.
-
-    Raise :exc:`~websockets.exceptions.InvalidHeaderFormat` on invalid inputs.
-
-    """
-    return parse_list(parse_connection_option, header, 0, "Connection")
-
-
-def check_response(headers: Headers, key: str) -> None:
-    """
-    Check a handshake response received from the server.
-
-    ``key`` comes from :func:`build_request`.
-
-    If the handshake is valid, this function returns ``None``.
-
-    Otherwise it raises an :exc:`~websockets.exceptions.InvalidHandshake`
-    exception.
-
-    This function doesn't verify that the response is an HTTP/1.1 or higher
-    response with a 101 status code. These controls are the responsibility of
-    the caller.
-
-    """
-    connection = sum(
-        [parse_connection(value) for value in headers.get_all("Connection")], []
-    )
-
-    if not any(value.lower() == "upgrade" for value in connection):
-        raise InvalidUpgrade("Connection", " ".join(connection))
-
-    upgrade = sum([parse_upgrade(value) for value in headers.get_all("Upgrade")], [])
-
-    # For compatibility with non-strict implementations, ignore case when
-    # checking the Upgrade header. It's supposed to be 'WebSocket'.
-    if not (len(upgrade) == 1 and upgrade[0].lower() == "websocket"):
-        raise InvalidUpgrade("Upgrade", ", ".join(upgrade))
-
-    try:
-        s_w_accept = headers["Sec-WebSocket-Accept"]
-    except KeyError:
-        raise InvalidHeader("Sec-WebSocket-Accept")
-    except MultipleValuesError:
-        raise InvalidHeader(
-            "Sec-WebSocket-Accept", "more than one Sec-WebSocket-Accept header found"
-        )
-
-    if s_w_accept != accept(key):
-        raise InvalidHeaderValue("Sec-WebSocket-Accept", s_w_accept)
