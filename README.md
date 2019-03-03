@@ -6,7 +6,9 @@ asyncwsc(Async WebSocket Client) 是一个遵循 WebSocket 规范的异步 WebSo
 为什么说它快？
 因为它基于 asyncio，全程异步
 ```
-# 使用示例(开发版)
+![images](https://github.com/asyncins/asyncwsc/blob/master/images/asyncwsc-logo.jpg)
+
+# 使用示例(ws 协议 开发版)
 
 ```
 # examples.py
@@ -34,7 +36,7 @@ if __name__ == '__main__':
 
 ```
 
-# WSS
+#  使用示例(wss 协议 开发版)
 wss 与 ws 的关系就像是 HTTPS 和 HTTP 一样，如果需要使用 wss 协议，只需要在连接时添加 ssl=True 即可：
 
 ```
@@ -79,10 +81,9 @@ if __name__ == '__main__':
 相比 websockets 库的结构，asyncwsc 文件结构非常清晰，并且代码量很少。由于 websockets 库用的是 asyncio 旧语法，并且通过 StreameProtocol
 协议，实现自定义协议，加上功能设计不明确，所以导致它的结构比较混乱。整个 websockets 库的源码图我没有画出，但是在调试时候有绘制改进图，StreameProtocol 协议（改进草图）类似下图：
 
+![images](https://github.com/asyncins/asyncwsc/blob/master/images/WebSocketsCommonProtocol.png)
 
-
-
-
+这仅仅是协议的改进草稿，实际上源码的逻辑更为混乱。
 
 # WebSocket 及协议相关知识
 
