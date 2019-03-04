@@ -2,7 +2,7 @@ import re
 import random
 import base64
 
-from exceptions import HandShakeError
+from .exceptions import HandShakeError
 
 
 _value_re = re.compile(rb"[\x09\x20-\x7e\x80-\xff]*")

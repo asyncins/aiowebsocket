@@ -1,0 +1,13 @@
+README.rst
+setup.py
+aiowebsocket/__init__.py
+aiowebsocket/converses.py
+aiowebsocket/enumerations.py
+aiowebsocket/exceptions.py
+aiowebsocket/freams.py
+aiowebsocket/handshakes.py
+aiowebsocket/parts.py
+aiowebsocket.egg-info/PKG-INFO
+aiowebsocket.egg-info/SOURCES.txt
+aiowebsocket.egg-info/dependency_links.txt
+aiowebsocket.egg-info/top_level.txt

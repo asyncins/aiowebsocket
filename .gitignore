@@ -1,1 +1,4 @@
 .idea/
+.build/
+.dist/
+.aiowebsocket.egg-info/

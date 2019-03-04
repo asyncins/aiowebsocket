@@ -2,10 +2,10 @@ import asyncio
 import logging
 from asyncio import Queue
 
-from freams import Frames
-from enumerations import SocketState, ControlFrames, DataFrames
-from handshakes import HandShake
-from parts import remote_url
+from .freams import Frames
+from .enumerations import SocketState, ControlFrames, DataFrames
+from .handshakes import HandShake
+from .parts import remote_url
 
 
 class AioWebSocket:

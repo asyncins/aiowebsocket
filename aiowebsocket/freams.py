@@ -112,8 +112,8 @@ import random
 import logging
 from struct import pack, unpack
 from itertools import cycle
-from enumerations import *
-from exceptions import FrameError
+from .enumerations import *
+from .exceptions import FrameError
 
 
 class Frames:
