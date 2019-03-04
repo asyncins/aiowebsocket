@@ -1,33 +1,37 @@
+
+# aiowebsocket: Asynchronous websocket client
+AioWebSocket is an asynchronous WebSocket client that follows the WebSocket specification and is lighter and faster than other libraries.
+AioWebSocket是一个遵循 WebSocket 规范的异步 WebSocket 客户端，相对于其他库它更轻、更快。
 ![images](https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket.jpg)
 
-# 简介
-AioWebSocket(Async WebSocket Client) 是一个遵循 WebSocket 规范的异步 WebSocket 客户端，它更轻、更快。
 ```
-什么说它轻？
-因为它代码仅 30 kb
-为什么说它快？
-因为它基于 asyncio，全程异步
+Why is it Lighter？
+Code volume just 30 KB
+Why is it Faster？
+it is based on asyncio and asynchronous
 ```
 
-# 安装
+# Installation
 
 ```
 # 明日打包，上传pypi
 ```
 
-# 使用示例(ws 协议 开发版)
+# Usage(ws)
 
 ```
 # examples.py
 import asyncio
-from converses import Connect
+import logging
 from datetime import datetime
+
+from converses import AioWebSocket
 
 
 async def startup(uri):
-    async with Connect(uri) as connect:
-        converse = connect.manipulator
-        message = b'Async WebSocket Client'
+    async with AioWebSocket(uri) as aws:
+        converse = aws.manipulator
+        message = b'AioWebSocket - Async WebSocket Client'
         while True:
             await converse.send(message)
             print('{time}-Client send: {message}'
@@ -39,23 +43,29 @@ async def startup(uri):
 
 if __name__ == '__main__':
     remote = 'ws://echo.websocket.org'
-    asyncio.get_event_loop().run_until_complete(startup(remote))
-
+    try:
+        asyncio.get_event_loop().run_until_complete(startup(remote))
+    except KeyboardInterrupt as exc:
+        logging.info('Quit.')
 ```
 
-#  使用示例(wss 协议 开发版)
-wss 与 ws 的关系就像是 HTTPS 和 HTTP 一样，如果需要使用 wss 协议，只需要在连接时添加 ssl=True 即可：
+# Usage(wss)
+
+The relationship between WSS and WS is just like HTTPS and HTTP. If you need to use the WSS protocol, you only need to add SSL = True when connecting:
 
 ```
+# examples.py
 import asyncio
-from converses import Connect
+import logging
 from datetime import datetime
+
+from converses import AioWebSocket
 
 
 async def startup(uri):
-    async with Connect(uri, ssl=True) as connect:
-        converse = connect.manipulator
-        message = b'Async WebSocket Client'
+    async with AioWebSocket(uri, ssl=True) as aws:
+        converse = aws.manipulator
+        message = b'AioWebSocket - Async WebSocket Client'
         while True:
             await converse.send(message)
             print('{time}-Client send: {message}'
@@ -67,11 +77,13 @@ async def startup(uri):
 
 if __name__ == '__main__':
     remote = 'wss://echo.websocket.org'
-    asyncio.get_event_loop().run_until_complete(startup(remote))
-
+    try:
+        asyncio.get_event_loop().run_until_complete(startup(remote))
+    except KeyboardInterrupt as exc:
+        logging.info('Quit.')
 ```
 
-# 开发说明
+# 开发故事
 在开发 asyncwsc 库之前，我参考了 websocket-client 和 websockets 这两个库，在阅读过源码以及使用过后觉得 WebSocket 的连接应该与这两个库一样方便，但是在速度和代码结构上还可以更清晰，所以在完全不懂 WebSocket 的情况下通过阅读、调试源码以及翻阅资料：
 
 * Python 网络和进程间通信 https://docs.python.org/3/library/ipc.html
