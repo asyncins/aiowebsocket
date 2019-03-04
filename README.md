@@ -5,9 +5,7 @@ AioWebSocket is an asynchronous WebSocket client that
 
 follows the WebSocket specification and is lighter and faster than other libraries.
 
-AioWebSocket是一个遵循 WebSocket 规范的
-
-异步 WebSocket 客户端，相对于其他库它更轻、更快。
+AioWebSocket是一个遵循 WebSocket 规范的 异步 WebSocket 客户端，相对于其他库它更轻、更快。
 
 ![images](https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket.jpg)
 
@@ -132,6 +130,16 @@ if __name__ == '__main__':
 
 ```
 
+# Todo list
+
+* 整体测试：虽然在开发过程中做了很多测试，但是没有使用 TestCase 进行功能性测试，后期有时间会专门编写 aiowebsocket 的 Testase。
+* 动作预处理：create/close connection 以及 open 等动作的预处理暂未设定，在 websockets 源码中有预处理的思想痕迹，我认为这是非常好的，值得我学习。
+* 问题修正：记录使用过程中出现的问题，并腾出时间进行调优和修正。
+
+# 版本记录
+
+* 2019-03-05 aiowebsocket 1.0.0 dev-1 发布，dev-1 版本具备 ws 和 wss 协议的连接能力，并且支持自定义 header。
+
 
 # 开发故事
 
@@ -144,7 +152,12 @@ if __name__ == '__main__':
 * Python Web学习笔记之WebSocket 通信过程与实现 https://www.cnblogs.com/JetpropelledSnake/p/9033064.html#_label1
 * python---websocket的使用 https://www.cnblogs.com/ssyfj/p/9245150.html
 
-最终用了 7 天时间完成 aiowebsocket 库的设计和开发。下图是 aiowebsocket 库文件结构以及类的设计图：
+最终用了 `7` 天时间完成 aiowebsocket 库的设计和开发。
+
+aiowebsocket 支持 ws 和 wss 这两种协议，同时允许使用自定义请求头，这极大的方便了使用者。
+
+
+下图是 aiowebsocket 库文件结构以及类的设计图：
 
 ![images](https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket-class.png)
 
