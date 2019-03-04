@@ -24,7 +24,10 @@ it is based on asyncio and asynchronous
 pip install aiowebsocket
 ```
 
-# Usage(ws)
+# Usage
+The relationship between WSS and WS is just like HTTPS and HTTP.
+
+### ws
 
 ```
 import asyncio
@@ -55,11 +58,8 @@ if __name__ == '__main__':
 
 ```
 
-# wss
-
-The relationship between WSS and WS is just like HTTPS and HTTP. If you need to use the WSS protocol
-
-just need to add SSL = True when connecting:
+### wss
+If you need to use the WSS protocol just need to add SSL = True when connecting:
 
 ```
 import asyncio
@@ -89,6 +89,49 @@ if __name__ == '__main__':
         logging.info('Quit.')
 
 ```
+
+### custom header
+
+aiowebsocket just build a request header that meets the websocket standard, but some websites need to add additional information so that you can use a custom request header,like this:
+
+```
+import asyncio
+import logging
+from datetime import datetime
+from aiowebsocket.converses import AioWebSocket
+
+
+async def startup(uri, header):
+    async with AioWebSocket(uri, headers=header) as aws:
+        converse = aws.manipulator
+        message = b'AioWebSocket - Async WebSocket Client'
+        while True:
+            await converse.send(message)
+            print('{time}-Client send: {message}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message=message))
+            mes = await converse.receive()
+            print('{time}-Client receive: {rec}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), rec=mes))
+
+
+if __name__ == '__main__':
+    remote = 'ws://123.207.167.163:9010/ajaxchattest'
+    header = [
+        'GET /ajaxchattest HTTP/1.1',
+        'Connection: Upgrade',
+        'Host: 123.207.167.163:9010',
+        'Origin: http://coolaf.com',
+        'Sec-WebSocket-Key: RmDgZzaqqvC4hGlWBsEmwQ==',
+        'Sec-WebSocket-Version: 13',
+        'Upgrade: websocket',
+        ]
+    try:
+        asyncio.get_event_loop().run_until_complete(startup(remote, header))
+    except KeyboardInterrupt as exc:
+        logging.info('Quit.')
+
+```
+
 
 # 开发故事
 
