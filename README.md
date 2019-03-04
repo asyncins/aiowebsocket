@@ -7,7 +7,7 @@ follows the WebSocket specification and is lighter and faster than other librari
 
 AioWebSocket是一个遵循 WebSocket 规范的 异步 WebSocket 客户端，相对于其他库它更轻、更快。
 
-![images](https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket.jpg)
+![images](https://github.com/asyncins/aiowebsocket/blob/master/images/aiowebsocket.jpg)
 
 ```
 Why is it Lighter？
@@ -159,18 +159,40 @@ aiowebsocket 支持 ws 和 wss 这两种协议，同时允许使用自定义请�
 
 下图是 aiowebsocket 库文件结构以及类的设计图：
 
-![images](https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket-class.png)
+![images](https://github.com/asyncins/aiowebsocket/blob/master/images/aiowebsocket-class.png)
 
-相比 websockets 库的结构，asyncwsc 文件结构非常清晰，并且代码量很少。由于 websockets 库用的是 asyncio 旧语法，并且通过 StreameProtocol
-协议，实现自定义协议，加上功能设计不明确，所以导致它的结构比较混乱。整个 websockets 库的源码图我没有画出，但是在调试时候有绘制改进图，StreameProtocol 协议（改进草图）类似下图：
+相比 websockets 库的结构，aiowebsocket 库的文件结构非常清晰，并且代码量很少。由于 websockets 库用的是 asyncio 旧语法，并且通过继承StreameProtocol 实现自定义协议，加上功能设计不明确（有很多不明确的预处理和 pending task 存在），所以导致它的结构比较混乱。
 
-![images](https://github.com/asyncins/asyncwsc/blob/master/images/WebSocketsCommonProtocol.png)
+整个 websockets 库的源码图我没有画出，但是在调试时候有绘制改进图，WebSocketsCOmmonProtocol 协议（改进草图）类似下图：
 
-这仅仅是协议的改进草稿，实际上源码的逻辑更为混乱。
+![images](https://github.com/asyncins/aiowebsocket/blob/master/images/WebSocketsCommonProtocol.png)
+
+这是协议的改进草稿，实际上源码的逻辑更为混乱，这也是导致我费尽心力设计一个新库的原因之一。
 
 # WebSocket 及协议相关知识
 
-WebSocket status Code [tools.ietf.org](https://tools.ietf.org/html/rfc6455#section-7.4.1)
+### 什么是 WebSocket
+
+### WebSocket的优势
+
+### Python Socket
+
+### WebSocket 协议
+
+### 请求头与握手连接
+
+### 数据帧
+
+##### Data Frame
+
+##### Control Frame
+
+##### 掩码 Mask
+
+##### 平公公与彭公公
+
+
+### WebSocket status Code [tools.ietf.org](https://tools.ietf.org/html/rfc6455#section-7.4.1)
 
 状态码 | 名称 |  含义描述  
 -|-|-
