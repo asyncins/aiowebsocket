@@ -1,111 +1,101 @@
 
-aiowebsocket: Asynchronous websocket client
-==================================
+# aiowebsocket: Asynchronous websocket client
 
-.. image:: https://img.shields.io/pypi/v/aiofiles.svg
-        :target: https://pypi.python.org/pypi/aiofiles
+AioWebSocket is an asynchronous WebSocket client that 
 
-.. image:: https://travis-ci.org/Tinche/aiofiles.svg?branch=master
-        :target: https://travis-ci.org/Tinche/aiofiles
-
-.. image:: https://codecov.io/gh/Tinche/aiofiles/branch/master/graph/badge.svg
-        :target: https://codecov.io/gh/Tinche/aiofiles
-
-.. image:: https://img.shields.io/pypi/pyversions/aiofiles.svg
-        :target: https://github.com/Tinche/aiofiles
-        :alt: Supported Python versions
-        
-AioWebSocket is an asynchronous WebSocket client that follows the WebSocket specification 
+follows the WebSocket specification 
 
 and is lighter and faster than other libraries.
 
-AioWebSocket是一个遵循 WebSocket 规范的异步 WebSocket 客户端，相对于其他库它更轻、更快。
-.. image:: https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket.jpg
+AioWebSocket是一个遵循 WebSocket 规范的
 
-.. code-block:: python
+异步 WebSocket 客户端，相对于其他库它更轻、更快。
 
-    Why is it Lighter？
-    Code volume just 30 KB
-    Why is it Faster？
-    it is based on asyncio and asynchronous
+![images](https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket.jpg)
 
+```
+Why is it Lighter？
+Code volume just 30 KB
+Why is it Faster？
+it is based on asyncio and asynchronous
+```
 
-Installation
-==================================
+# Installation
 
-.. code-block:: python
+```
+pip install aiowebsocket
+```
 
-    pip install aiowebsocket
+# Usage(ws)
 
-
-Usage(ws)
-==================================
-
-.. code-block:: python
-
-    import asyncio
-    import logging
-    from datetime import datetime
-    from aiowebsocket.converses import AioWebSocket
-    
-    
-    async def startup(uri):
-        async with AioWebSocket(uri) as aws:
-            converse = aws.manipulator
-            message = b'AioWebSocket - Async WebSocket Client'
-            while True:
-                await converse.send(message)
-                print('{time}-Client send: {message}'
-                      .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message=message))
-                mes = await converse.receive()
-                print('{time}-Client receive: {rec}'
-                      .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), rec=mes))
+```
+import asyncio
+import logging
+from datetime import datetime
+from aiowebsocket.converses import AioWebSocket
 
 
-    if __name__ == '__main__':
-        remote = 'ws://echo.websocket.org'
-        try:
-            asyncio.get_event_loop().run_until_complete(startup(remote))
-        except KeyboardInterrupt as exc:
-            logging.info('Quit.')
+async def startup(uri):
+    async with AioWebSocket(uri) as aws:
+        converse = aws.manipulator
+        message = b'AioWebSocket - Async WebSocket Client'
+        while True:
+            await converse.send(message)
+            print('{time}-Client send: {message}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message=message))
+            mes = await converse.receive()
+            print('{time}-Client receive: {rec}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), rec=mes))
 
 
-Usage(wss)
-==================================
+if __name__ == '__main__':
+    remote = 'ws://echo.websocket.org'
+    try:
+        asyncio.get_event_loop().run_until_complete(startup(remote))
+    except KeyboardInterrupt as exc:
+        logging.info('Quit.')
 
-The relationship between WSS and WS is just like HTTPS and HTTP. If you need to use the WSS protocol, you only need to add SSL = True when connecting:
+```
 
-.. code-block:: python
+# Usage(wss)
 
-    import asyncio
-    import logging
-    from datetime import datetime
-    from aiowebsocket.converses import AioWebSocket
-    
-    
-    async def startup(uri):
-        async with AioWebSocket(uri, ssl=True) as aws:
-            converse = aws.manipulator
-            message = b'AioWebSocket - Async WebSocket Client'
-            while True:
-                await converse.send(message)
-                print('{time}-Client send: {message}'
-                      .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message=message))
-                mes = await converse.receive()
-                print('{time}-Client receive: {rec}'
-                      .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), rec=mes))
-    
-    
-    if __name__ == '__main__':
-        remote = 'wss://echo.websocket.org'
-        try:
-            asyncio.get_event_loop().run_until_complete(startup(remote))
-        except KeyboardInterrupt as exc:
-            logging.info('Quit.')
+The relationship between WSS and WS is just like 
+
+HTTPS and HTTP. If you need to use the WSS protocol
+
+you only need to add SSL = True when connecting:
+
+```
+import asyncio
+import logging
+from datetime import datetime
+from aiowebsocket.converses import AioWebSocket
 
 
-开发故事
-===================
+async def startup(uri):
+    async with AioWebSocket(uri, ssl=True) as aws:
+        converse = aws.manipulator
+        message = b'AioWebSocket - Async WebSocket Client'
+        while True:
+            await converse.send(message)
+            print('{time}-Client send: {message}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message=message))
+            mes = await converse.receive()
+            print('{time}-Client receive: {rec}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), rec=mes))
+
+
+if __name__ == '__main__':
+    remote = 'wss://echo.websocket.org'
+    try:
+        asyncio.get_event_loop().run_until_complete(startup(remote))
+    except KeyboardInterrupt as exc:
+        logging.info('Quit.')
+
+```
+
+# 开发故事
+
 在开发 aiowebsocket 库之前，我参考了 websocket-client 和 websockets 这两个库，在阅读过源码以及使用过后觉得 WebSocket 的连接应该与这两个库一样方便，但是在速度和代码结构上还可以更清晰，所以在完全不懂 WebSocket 的情况下通过阅读、调试源码以及翻阅资料：
 
 * Python 网络和进程间通信 https://docs.python.org/3/library/ipc.html
@@ -126,8 +116,7 @@ The relationship between WSS and WS is just like HTTPS and HTTP. If you need to 
 
 这仅仅是协议的改进草稿，实际上源码的逻辑更为混乱。
 
-WebSocket 及协议相关知识
-=====================================
+# WebSocket 及协议相关知识
 
 WebSocket status Code [tools.ietf.org](https://tools.ietf.org/html/rfc6455#section-7.4.1)
 
