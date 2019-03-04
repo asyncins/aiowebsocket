@@ -3,9 +3,7 @@
 
 AioWebSocket is an asynchronous WebSocket client that 
 
-follows the WebSocket specification 
-
-and is lighter and faster than other libraries.
+follows the WebSocket specification and is lighter and faster than other libraries.
 
 AioWebSocket是一个遵循 WebSocket 规范的
 
@@ -57,13 +55,11 @@ if __name__ == '__main__':
 
 ```
 
-# Usage(wss)
+# wss
 
-The relationship between WSS and WS is just like 
+The relationship between WSS and WS is just like HTTPS and HTTP. If you need to use the WSS protocol
 
-HTTPS and HTTP. If you need to use the WSS protocol
-
-you only need to add SSL = True when connecting:
+just need to add SSL = True when connecting:
 
 ```
 import asyncio
@@ -107,7 +103,7 @@ if __name__ == '__main__':
 
 最终用了 7 天时间完成 aiowebsocket 库的设计和开发。下图是 aiowebsocket 库文件结构以及类的设计图：
 
-![images](https://github.com/asyncins/asyncwsc/blob/master/images/asyncwsc-class.png)
+![images](https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket-class.png)
 
 相比 websockets 库的结构，asyncwsc 文件结构非常清晰，并且代码量很少。由于 websockets 库用的是 asyncio 旧语法，并且通过 StreameProtocol
 协议，实现自定义协议，加上功能设计不明确，所以导致它的结构比较混乱。整个 websockets 库的源码图我没有画出，但是在调试时候有绘制改进图，StreameProtocol 协议（改进草图）类似下图：
