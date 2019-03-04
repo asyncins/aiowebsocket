@@ -195,6 +195,7 @@ if __name__ == '__main__':
 
 ##### 平公公与彭公公
 
+以上列出的知识，可以阅读我在掘金社区发表的文章 [WebSocket 从入门到写出开源库](https://juejin.im/post/5c7cdaabf265da2daf79c15f)
 
 ### WebSocket status Code [tools.ietf.org](https://tools.ietf.org/html/rfc6455#section-7.4.1)
 
