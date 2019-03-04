@@ -23,10 +23,10 @@ pip install aiowebsocket
 # Usage(ws)
 
 ```
-# examples.py
-from aiowebsocket import AioWebsocket
-
-from converses import AioWebSocket
+import asyncio
+import logging
+from datetime import datetime
+from aiowebsocket.converses import AioWebSocket
 
 
 async def startup(uri):
@@ -48,6 +48,7 @@ if __name__ == '__main__':
         asyncio.get_event_loop().run_until_complete(startup(remote))
     except KeyboardInterrupt as exc:
         logging.info('Quit.')
+
 ```
 
 # Usage(wss)
@@ -55,12 +56,10 @@ if __name__ == '__main__':
 The relationship between WSS and WS is just like HTTPS and HTTP. If you need to use the WSS protocol, you only need to add SSL = True when connecting:
 
 ```
-# examples.py
 import asyncio
 import logging
 from datetime import datetime
-
-from converses import AioWebSocket
+from aiowebsocket.converses import AioWebSocket
 
 
 async def startup(uri):
@@ -82,10 +81,11 @@ if __name__ == '__main__':
         asyncio.get_event_loop().run_until_complete(startup(remote))
     except KeyboardInterrupt as exc:
         logging.info('Quit.')
+
 ```
 
 # 开发故事
-在开发 asyncwsc 库之前，我参考了 websocket-client 和 websockets 这两个库，在阅读过源码以及使用过后觉得 WebSocket 的连接应该与这两个库一样方便，但是在速度和代码结构上还可以更清晰，所以在完全不懂 WebSocket 的情况下通过阅读、调试源码以及翻阅资料：
+在开发 aiowebsocket 库之前，我参考了 websocket-client 和 websockets 这两个库，在阅读过源码以及使用过后觉得 WebSocket 的连接应该与这两个库一样方便，但是在速度和代码结构上还可以更清晰，所以在完全不懂 WebSocket 的情况下通过阅读、调试源码以及翻阅资料：
 
 * Python 网络和进程间通信 https://docs.python.org/3/library/ipc.html
 * WebSocket 规范 https://tools.ietf.org/html/rfc6455#section-1.2
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 * Python Web学习笔记之WebSocket 通信过程与实现 https://www.cnblogs.com/JetpropelledSnake/p/9033064.html#_label1
 * python---websocket的使用 https://www.cnblogs.com/ssyfj/p/9245150.html
 
-最终用了 7 天时间完成 asyncwsc 库的设计和开发。下图是 asyncwsc 库文件结构以及类的设计图：
+最终用了 7 天时间完成 aiowebsocket 库的设计和开发。下图是 aiowebsocket 库文件结构以及类的设计图：
 
 ![images](https://github.com/asyncins/asyncwsc/blob/master/images/asyncwsc-class.png)
 
