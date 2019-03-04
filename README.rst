@@ -20,9 +20,10 @@ AioWebSocket is an asynchronous WebSocket client that follows the WebSocket spec
 and is lighter and faster than other libraries.
 
 AioWebSocket是一个遵循 WebSocket 规范的异步 WebSocket 客户端，相对于其他库它更轻、更快。
-![images](https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket.jpg)
+.. image:: https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket.jpg
 
 .. code-block:: python
+
     Why is it Lighter？
     Code volume just 30 KB
     Why is it Faster？
@@ -33,6 +34,7 @@ Installation
 ==================================
 
 .. code-block:: python
+
     pip install aiowebsocket
 
 
@@ -74,6 +76,7 @@ Usage(wss)
 The relationship between WSS and WS is just like HTTPS and HTTP. If you need to use the WSS protocol, you only need to add SSL = True when connecting:
 
 .. code-block:: python
+
     import asyncio
     import logging
     from datetime import datetime
