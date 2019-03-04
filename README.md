@@ -1,6 +1,7 @@
-![images](https://github.com/asyncins/asyncwsc/blob/master/images/asyncwsclogo_gaitubao_com_169x169.jpg)
+![images](https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket.jpg)
+
 # 简介
-asyncwsc(Async WebSocket Client) 是一个遵循 WebSocket 规范的异步 WebSocket 客户端，它具有轻和快这两个特点。
+AioWebSocket(Async WebSocket Client) 是一个遵循 WebSocket 规范的异步 WebSocket 客户端，它更轻、更快。
 ```
 什么说它轻？
 因为它代码仅 30 kb
