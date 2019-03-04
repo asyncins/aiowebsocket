@@ -140,10 +140,13 @@ if __name__ == '__main__':
 
 * 2019-03-05 aiowebsocket 1.0.0 dev-1 发布，dev-1 版本具备 ws 和 wss 协议的连接能力，并且支持自定义 header。
 
+# 作者信息
 
-# 开发故事
+* 掘金小册作者 [Python 实战：用 Scrapyd 打造个人化的爬虫部署管理控制台](https://juejin.im/book/5bb5d3fa6fb9a05d2a1d819a) 
+* 华为云社区认证云享专家  [云社区](https://bbs.huaweicloud.com/community/trends/id_1543810295325819)
+* 微信公众号【进击的Coder】 管理员之一
 
-在开发 aiowebsocket 库之前，我参考了 websocket-client 和 websockets 这两个库，在阅读过源码以及使用过后觉得 WebSocket 的连接应该与这两个库一样方便，但是在速度和代码结构上还可以更清晰，所以在完全不懂 WebSocket 的情况下通过阅读、调试源码以及翻阅资料：
+# 参考资料
 
 * Python 网络和进程间通信 https://docs.python.org/3/library/ipc.html
 * WebSocket 规范 https://tools.ietf.org/html/rfc6455#section-1.2
@@ -152,12 +155,13 @@ if __name__ == '__main__':
 * Python Web学习笔记之WebSocket 通信过程与实现 https://www.cnblogs.com/JetpropelledSnake/p/9033064.html#_label1
 * python---websocket的使用 https://www.cnblogs.com/ssyfj/p/9245150.html
 
-最终用了 `7` 天时间完成 aiowebsocket 库的设计和开发。
-
-aiowebsocket 支持 ws 和 wss 这两种协议，同时允许使用自定义请求头，这极大的方便了使用者。
 
 
-下图是 aiowebsocket 库文件结构以及类的设计图：
+# 开发故事
+
+在开发 aiowebsocket 库之前，我参考了 websocket-client 和 websockets 这两个库，在阅读过源码以及使用过后觉得 WebSocket 的连接不仅仅要像它们一样方便，还要更轻、更快、更灵活，在代码结构上还可以更清晰。所以我在完全不懂 WebSocket 的情况下通过阅读文章、调试源码以及翻阅文档，最终用了 `7` 天时间完成 aiowebsocket 库的设计和开发。
+
+目前 aiowebsocket 支持 ws 和 wss 这两种协议，同时允许使用自定义请求头，这极大的方便了使用者。下图是 aiowebsocket 库文件结构以及类的设计图：
 
 ![images](https://github.com/asyncins/aiowebsocket/blob/master/images/aiowebsocket-class.png)
 
