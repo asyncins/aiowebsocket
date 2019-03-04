@@ -1,6 +1,9 @@
 
 # aiowebsocket: Asynchronous websocket client
-AioWebSocket is an asynchronous WebSocket client that follows the WebSocket specification and is lighter and faster than other libraries.
+AioWebSocket is an asynchronous WebSocket client that follows the WebSocket specification 
+
+and is lighter and faster than other libraries.
+
 AioWebSocket是一个遵循 WebSocket 规范的异步 WebSocket 客户端，相对于其他库它更轻、更快。
 ![images](https://github.com/asyncins/asyncwsc/blob/master/images/aiowebsocket.jpg)
 
@@ -14,16 +17,14 @@ it is based on asyncio and asynchronous
 # Installation
 
 ```
-# 明日打包，上传pypi
+pip install aiowebsocket
 ```
 
 # Usage(ws)
 
 ```
 # examples.py
-import asyncio
-import logging
-from datetime import datetime
+from aiowebsocket import AioWebsocket
 
 from converses import AioWebSocket
 
