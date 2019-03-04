@@ -13,7 +13,9 @@ class AioWebSocket:
     connection between client and server
     """
 
-    def __init__(self, uri: str, timeout: int = 20, read_timeout: int = 120, ssl=False):
+    def __init__(self, uri: str, timeout: int = 20,
+                 read_timeout: int = 120, ssl=False,
+                 headers: list = []):
         self.uri = uri
         self.ssl = ssl
         self.hands = None
@@ -22,6 +24,7 @@ class AioWebSocket:
         self.converse = None
         self.timeout = timeout
         self.read_timeout = read_timeout
+        self.headers = headers
         self.state = SocketState.zero.value
 
     async def close_connection(self):
@@ -46,7 +49,7 @@ class AioWebSocket:
         reader, writer = await asyncio.open_connection(host=host, port=port, ssl=self.ssl)
         self.reader = reader
         self.writer = writer
-        self.hands = HandShake(remote, reader, writer)
+        self.hands = HandShake(remote, reader, writer, headers=self.headers)
         await self.hands.shake_()
         status_code = await self.hands.shake_result()
         if status_code is not 101:

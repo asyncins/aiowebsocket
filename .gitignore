@@ -4,3 +4,4 @@ __pycache__/
 .build/
 .dist/
 .aiowebsocket.egg-info/
+.examples.py

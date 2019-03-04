@@ -18,7 +18,7 @@ class HandShake:
 
     https://tools.ietf.org/html/rfc6455#section-1.3
     """
-    def __init__(self, remote, reader, writer, headers=None):
+    def __init__(self, remote, reader, writer, headers):
         self.remote = remote
         self.write = writer
         self.reader = reader
@@ -34,7 +34,7 @@ class HandShake:
         """
         if headers:
             # Allow the use of custom header
-            return '\r\n'.join(headers)
+            return '\r\n'.join(headers) + '\r\n'
 
         bytes_key = bytes(random.getrandbits(8) for _ in range(16))
         key = base64.b64encode(bytes_key).decode()
