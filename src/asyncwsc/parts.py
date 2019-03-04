@@ -5,7 +5,10 @@ REMOTE = namedtuple('REMOTE', ['porn', 'host', 'port', 'resource', 'users'])
 
 
 def remote_url(uri: str):
-    """通过拆解uri获得连接信息,对信息进行基本校验
+    """Connection information is obtained
+    by disassembling uri, and basic verification
+    of information is carried out.
+
     :param uri:'ws://exam.com'
     :return:class-> REMOTE
     :raise: exceptions.Unverified

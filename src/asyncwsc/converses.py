@@ -3,13 +3,15 @@ import logging
 from asyncio import Queue
 
 from freams import Frames
-from enumerations import SocketState, CtrlCode, OperationCode
+from enumerations import SocketState, ControlFrames, DataFrames
 from handshakes import HandShake
 from parts import remote_url
 
 
-class Connect:
-    """ 司职连接 """
+class AioWebSocket:
+    """Responsible for managing the
+    connection between client and server
+    """
 
     def __init__(self, uri: str, timeout: int = 20, read_timeout: int = 120, ssl=False):
         self.uri = uri
@@ -23,22 +25,20 @@ class Connect:
         self.state = SocketState.zero.value
 
     async def close_connection(self):
-        """ 关闭连接
-        关闭前检查连接状态
-        向服务端发送关闭帧
-        召唤雨化田公公
-         """
+        """Close connection.
+        Check connection status before closing.
+        Send Closed Frame to Server.
+        """
         if self.state is SocketState.closed.value:
             raise ConnectionError('SocketState is closed, can not close.')
         if self.state is SocketState.closing:
             logging.warning('SocketState is closing')
-        await self.converse.send(message=b'', code=CtrlCode.close.value)
+        await self.converse.send(message=b'', code=ControlFrames.close.value)
 
     async def create_connection(self):
-        """ 创建连接
-        校验当前连接状态
-        拆解uri，得到服务端信息后创建连接、实例化HandShake
-        发出握手并校验握手结果
+        """Create connection.
+        Check the current connection status.
+        Send out a handshake and check the result。
         """
         if self.state is not SocketState.zero.value:
             raise ConnectionError('Connection is already exists.')
@@ -71,7 +71,9 @@ class Connect:
 
 
 class Converse:
-    """ 司职通信交流 """
+    """Responsible for communication
+    between client and server
+    """
     def __init__(self, reader: object, writer: object, maxsize: int = 2**16):
         self.reader = reader
         self.writer = writer
@@ -79,8 +81,8 @@ class Converse:
         self.frame = Frames(self.reader, self.writer)
 
     async def send(self, message: bytes, fin: bool = True,
-                   code: int = OperationCode.binary.value):
-        """ 向服务端发送消息 """
+                   code: int = DataFrames.binary.value):
+        """Send message to server """
         if isinstance(message, str):
             message = message.encode('utf-8')
         if isinstance(message, bytes):
@@ -90,8 +92,9 @@ class Converse:
         await self.frame.write(fin=fin, code=code, message=message)
 
     async def receive(self):
-        """ 获取一条消息
-        如果消息队列中没有消息则尝试读取，否则直接从消息队列中弹出一条
+        """Get a message
+        If there is no message in the message queue,
+        try to read it or pop up directly from the message queue
         """
         if not self.message_queue.qsize():
             single_message = await self.frame.read()

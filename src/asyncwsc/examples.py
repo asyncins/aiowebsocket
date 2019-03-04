@@ -1,12 +1,14 @@
 import asyncio
-from converses import Connect
+import logging
 from datetime import datetime
+
+from converses import AioWebSocket
 
 
 async def startup(uri):
-    async with Connect(uri, ssl=True) as connect:
-        converse = connect.manipulator
-        message = b'Async WebSocket Client'
+    async with AioWebSocket(uri, ssl=True) as aws:
+        converse = aws.manipulator
+        message = b'AioWebSocket - Async WebSocket Client'
         while True:
             await converse.send(message)
             print('{time}-Client send: {message}'
@@ -18,4 +20,7 @@ async def startup(uri):
 
 if __name__ == '__main__':
     remote = 'wss://echo.websocket.org'
-    asyncio.get_event_loop().run_until_complete(startup(remote))
+    try:
+        asyncio.get_event_loop().run_until_complete(startup(remote))
+    except KeyboardInterrupt as exc:
+        logging.info('Quit.')
