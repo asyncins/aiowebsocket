@@ -121,6 +121,7 @@ class Frames:
     def __init__(self, reader: object, writer: object):
         self.reader = reader
         self.writer = writer
+        self.maxsize = 2**64
 
     @staticmethod
     def message_mask(message: bytes, mask):
@@ -190,7 +191,7 @@ class Frames:
             else:
                 raise FrameError('Invalid operation code.')
 
-    async def unpack_frame(self, mask=False, max_size=None):
+    async def unpack_frame(self, mask=False, maxsize=None):
         """Unpack data frame,data frame unmasked return from server
         so when unpacking, mask is false.
 
@@ -224,31 +225,32 @@ class Frames:
         elif length == 127:
             message = await reader(8)
             length, = unpack('!Q', message)
-        if max_size is not None and length > max_size:
-            raise FrameError("Message length is too long)".format(length, max_size))
+        if maxsize and length > maxsize:
+            raise FrameError("Message length is too long)".format(length, maxsize))
         if mask:
             mask_bits = await reader(4)
         message = self.message_mask(message, mask_bits) if mask else await reader(length)
-        await self.extra_operation(code, message)  # 可能需要的额外操作
         return fin, code, rsv1, rsv2, rsv3, message
 
-    async def read(self, mask=False, max_size=None):
-        """Decode data frames and return information
+    async def read(self, text=False, mask=False, maxsize=None):
+        """return information about message
         """
-        fin, code, rsv1, rsv2, rsv3, message = await self.unpack_frame(mask, max_size)
+        fin, code, rsv1, rsv2, rsv3, message = await self.unpack_frame(mask, maxsize)
         await self.extra_operation(code, message)  # 根据操作码决定后续操作
-        if rsv1 or rsv2 or rsv3:
-            logging.warning('Rsv not 0')
-        if len(message) > 125:
-            logging.warning('Control frame too long')
+        if any([rsv1, rsv2, rsv3]):
+            logging.warning('RSV not 0')
         if not fin:
-            logging.warning('Fragmented control frame')
-        if code is DataFrames.binary.value:
-            message = message.decode('utf-8')
+            logging.warning('Fragmented control frame:Not FIN')
+        if code is DataFrames.binary.value and text:
+            if isinstance(message, bytes):
+                message = message.decode()
+        if code is DataFrames.text.value and not text:
+            if isinstance(message, str):
+                message = message.encode()
         return message
 
     @staticmethod
-    def pack_message(fin, code, rsv1=0, rsv2=0, rsv3=0, mask=True):
+    def pack_message(fin, code, mask, rsv1=0, rsv2=0, rsv3=0):
         """Converting message into data frames
         conversion rule reference document:
         https://tools.ietf.org/html/rfc6455#section-5.2
@@ -263,11 +265,11 @@ class Frames:
         head2 = 0b10000000 if mask else 0  # Whether to mask or not
         return head1, head2
 
-    async def write(self, fin, code, message, rsv1=0, rsv2=0, rsv3=0, mask=True):
+    async def write(self, fin, code, message, mask=True, rsv1=0, rsv2=0, rsv3=0):
         """Converting messages to data frames and sending them.
         Client data frames must be masked,so mask is True.
         """
-        head1, head2 = self.pack_message(fin, code, rsv1, rsv2, rsv3, mask)
+        head1, head2 = self.pack_message(fin, code, mask, rsv1, rsv2, rsv3)
         output = io.BytesIO()
         length = len(message)
         if length < 126:

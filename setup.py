@@ -3,9 +3,6 @@ import os
 import re
 from setuptools import setup, find_packages
 
-with open('README.md') as f:
-    readme = f.read()
-
 
 def read(*parts):
     here = os.path.abspath(os.path.dirname(__file__))
@@ -31,7 +28,7 @@ setup(
     author='AsyncIns',
     author_email='asyncins@aliyun.com',
     description='Asynchronous WebSocket Client .',
-    long_description=readme,
+    long_description='See https://github.com/asyncins/aiowebsocket',
     classifiers=[
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",

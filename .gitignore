@@ -1,7 +1,5 @@
+idea/
+build/
+dist/
+aiowebsocket.egg-info/
 __pycache__/
-*.py[cod]
-.idea/
-.build/
-.dist/
-.aiowebsocket.egg-info/
-examples.py

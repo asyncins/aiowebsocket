@@ -5,7 +5,7 @@ from asyncio import Queue
 from .freams import Frames
 from .enumerations import SocketState, ControlFrames, DataFrames
 from .handshakes import HandShake
-from .parts import remote_url
+from .parts import parse_uri
 
 
 class AioWebSocket:
@@ -13,11 +13,10 @@ class AioWebSocket:
     connection between client and server
     """
 
-    def __init__(self, uri: str, timeout: int = 20,
-                 read_timeout: int = 120, ssl=False,
-                 headers: list = []):
+    def __init__(self, uri: str, headers: list = [],
+                 union_header: dict = {}, timeout: int = 30,
+                 read_timeout: int = 120):
         self.uri = uri
-        self.ssl = ssl
         self.hands = None
         self.reader = None
         self.writer = None
@@ -25,6 +24,7 @@ class AioWebSocket:
         self.timeout = timeout
         self.read_timeout = read_timeout
         self.headers = headers
+        self.union_header = union_header
         self.state = SocketState.zero.value
 
     async def close_connection(self):
@@ -36,7 +36,7 @@ class AioWebSocket:
             raise ConnectionError('SocketState is closed, can not close.')
         if self.state is SocketState.closing:
             logging.warning('SocketState is closing')
-        await self.converse.send(message=b'', code=ControlFrames.close.value)
+        await self.converse.send(message=b'')
 
     async def create_connection(self):
         """Create connection.
@@ -45,11 +45,13 @@ class AioWebSocket:
         """
         if self.state is not SocketState.zero.value:
             raise ConnectionError('Connection is already exists.')
-        remote = porn, host, port, resource, users = remote_url(self.uri)
-        reader, writer = await asyncio.open_connection(host=host, port=port, ssl=self.ssl)
+        remote = scheme, host, port, resource, ssl = parse_uri(self.uri)
+        reader, writer = await asyncio.open_connection(host=host, port=port, ssl=ssl)
         self.reader = reader
         self.writer = writer
-        self.hands = HandShake(remote, reader, writer, headers=self.headers)
+        self.hands = HandShake(remote, reader, writer,
+                               headers=self.headers,
+                               union_header=self.union_header)
         await self.hands.shake_()
         status_code = await self.hands.shake_result()
         if status_code is not 101:
@@ -83,24 +85,22 @@ class Converse:
         self.message_queue = Queue(maxsize=maxsize)
         self.frame = Frames(self.reader, self.writer)
 
-    async def send(self, message: bytes, fin: bool = True,
-                   code: int = DataFrames.binary.value):
+    async def send(self, message,
+                   fin: bool = True, mask: bool = True):
         """Send message to server """
-        if isinstance(message, str):
-            message = message.encode('utf-8')
-        if isinstance(message, bytes):
-            message = message
-        else:
-            raise ValueError('Message must be str or bytes,not {mst}'.format(mst=type(message)))
-        await self.frame.write(fin=fin, code=code, message=message)
 
-    async def receive(self):
+        if isinstance(message, str):
+            message = message.encode()
+        code = DataFrames.text.value
+        await self.frame.write(fin=fin, code=code, message=message, mask=mask)
+
+    async def receive(self, text=False, mask=False):
         """Get a message
         If there is no message in the message queue,
         try to read it or pop up directly from the message queue
         """
         if not self.message_queue.qsize():
-            single_message = await self.frame.read()
+            single_message = await self.frame.read(text, mask)
             await self.message_queue.put(single_message)
         message = await self.message_queue.get()
         return message or None
