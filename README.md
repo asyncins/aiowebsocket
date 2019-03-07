@@ -25,7 +25,9 @@ pip install aiowebsocket
 # Usage
 The relationship between WSS and WS is just like HTTPS and HTTP.
 
-### ws
+### ws and wss
+
+Now it can automatically recognize WS and WSS
 
 ```
 import asyncio
@@ -48,45 +50,15 @@ async def startup(uri):
 
 
 if __name__ == '__main__':
-    remote = 'ws://echo.websocket.org'
-    try:
-        asyncio.get_event_loop().run_until_complete(startup(remote))
-    except KeyboardInterrupt as exc:
-        logging.info('Quit.')
-
-```
-
-### wss
-If you need to use the WSS protocol just need to add SSL = True when connecting:
-
-```
-import asyncio
-import logging
-from datetime import datetime
-from aiowebsocket.converses import AioWebSocket
-
-
-async def startup(uri):
-    async with AioWebSocket(uri, ssl=True) as aws:
-        converse = aws.manipulator
-        message = b'AioWebSocket - Async WebSocket Client'
-        while True:
-            await converse.send(message)
-            print('{time}-Client send: {message}'
-                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message=message))
-            mes = await converse.receive()
-            print('{time}-Client receive: {rec}'
-                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), rec=mes))
-
-
-if __name__ == '__main__':
     remote = 'wss://echo.websocket.org'
+    # remote = 'ws://echo.websocket.org'
     try:
         asyncio.get_event_loop().run_until_complete(startup(remote))
     except KeyboardInterrupt as exc:
         logging.info('Quit.')
 
 ```
+
 
 ### custom header
 
@@ -130,6 +102,64 @@ if __name__ == '__main__':
 
 ```
 
+### union header
+Consider: because AIO provides the basic request header, and sometimes does not need to replace all the request headers, but only need to add or replace a field in the request header. So with the union_header parameter added, you can replace or add fields in the request header, such as Origin.
+
+```
+import asyncio
+import logging
+from datetime import datetime
+from aiowebsocket.converses import AioWebSocket
+
+
+async def startup(uri, union_header):
+    async with AioWebSocket(uri, union_header=union_header) as aws:
+        converse = aws.manipulator
+        message = b'AioWebSocket - Async WebSocket Client'
+        while True:
+            await converse.send(message)
+            print('{time}-Client send: {message}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), message=message))
+            mes = await converse.receive()
+            print('{time}-Client receive: {rec}'
+                  .format(time=datetime.now().strftime('%Y-%m-%d %H:%M:%S'), rec=mes))
+
+
+if __name__ == '__main__':
+    remote = 'ws://123.207.167.163:9010/ajaxchattest'
+    union_header = {'Origin': 'http://coolaf.com'}
+    try:
+        asyncio.get_event_loop().run_until_complete(startup(remote, union_header))
+    except KeyboardInterrupt as exc:
+        logging.info('Quit.')
+
+```
+
+union_header must be dict.
+
+With union, the request header information becomes：
+
+`# union_header = {'Origin': 'http://coolaf.com'}`
+
+```
+# before
+GET /chat HTTP/1.1
+Host: server.example.com
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Origin: Python/3.7
+```
+```
+# after
+GET /chat HTTP/1.1
+Host: server.example.com
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
+Origin: http://coolaf.com
+```
+
 # Todo list
 
 * 整体测试：虽然在开发过程中做了很多测试，但是没有使用 TestCase 进行功能性测试，后期有时间会专门编写 aiowebsocket 的 Testase。
@@ -138,7 +168,9 @@ if __name__ == '__main__':
 
 # 版本记录
 
+* 2019-03-07 aiowebsocket 1.0.0 dev-2 发布，新增自动识别和处理 ssl 能力、单个请求头字段添加/替换功能，优化数据帧读取逻辑。
 * 2019-03-05 aiowebsocket 1.0.0 dev-1 发布，dev-1 版本具备 ws 和 wss 协议的连接能力，并且支持自定义 header。
+
 
 # 作者信息
 
@@ -175,25 +207,9 @@ if __name__ == '__main__':
 
 # WebSocket 及协议相关知识
 
-### 什么是 WebSocket
+什么是 WebSocket、WebSocket的优势、Python Socket、WebSocket 协议
 
-### WebSocket的优势
-
-### Python Socket
-
-### WebSocket 协议
-
-### 请求头与握手连接
-
-### 数据帧
-
-##### Data Frame
-
-##### Control Frame
-
-##### 掩码 Mask
-
-##### 平公公与彭公公
+请求头与握手连接、数据帧、Data Frame、Control Frame、掩码 Mask、平公公与彭公公
 
 以上列出的知识，可以阅读我在掘金社区发表的文章 [WebSocket 从入门到写出开源库](https://juejin.im/post/5c7cdaabf265da2daf79c15f)
 
