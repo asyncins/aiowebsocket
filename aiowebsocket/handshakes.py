@@ -36,10 +36,14 @@ class HandShake:
         if self.headers:
             # Allow the use of custom header
             if isinstance(self.headers, list):
-                return '\r\n'.join(self.headers) + '\r\n'
+                self.headers.insert(0, 'GET {} HTTP/1.1'.format(resource))
+                self.headers.append('\r\n')
+                return '\r\n'.join(self.headers)
             if isinstance(self.headers, dict):
                 head = ['{}:{}'.format(k, item) for k, item in self.headers.items()]
-                return '\r\n'.join(head) + '\r\n'
+                self.headers.insert(0, 'GET {} HTTP/1.1'.format(resource))
+                self.headers.append('\r\n')
+                return '\r\n'.join(self.headers)
 
         bytes_key = bytes(random.getrandbits(8) for _ in range(16))
         key = base64.b64encode(bytes_key).decode()
