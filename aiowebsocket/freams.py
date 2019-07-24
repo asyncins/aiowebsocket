@@ -289,6 +289,8 @@ class Frames:
 
         output.write(message)
         self.writer.write(output.getvalue())
+        # it would see an error when the socket is closed.
+        await self.writer.drain()
 
     async def receive_close(self):
         """ When you receive a message that
