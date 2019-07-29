@@ -176,7 +176,8 @@ Origin: http://coolaf.com
 
 * 掘金小册作者 [Python 实战：用 Scrapyd 打造个人化的爬虫部署管理控制台](https://juejin.im/book/5bb5d3fa6fb9a05d2a1d819a) 
 * 华为云社区认证云享专家  [云社区](https://bbs.huaweicloud.com/community/trends/id_1543810295325819)
-* 微信公众号【进击的Coder】 管理员之一
+* 微信公众号[【进击的Coder】](http://mp.weixin.qq.com/profile?src=3&timestamp=1564442339&ver=1&signature=EjWFEy17QPkai42rqDiACqLAzI5-q0qE*3Qr67VK1REKi16u4jc7RyjnTYIWlCfIc73zGS3RkQGspd-t2th22g==) 管理员之一
+* 微信公众号[【Rust之蝉】](http://mp.weixin.qq.com/profile?src=3&timestamp=1564442465&ver=1&signature=jlN9nxFjkVHEILFMnzzALKXA92Z5zGxbef7SbbICB5fRviONJ3BNTtd23Zomt33jNkf9arKU18ZHZ2JJy4Muhw==)号主
 
 # 参考资料
 
@@ -199,11 +200,11 @@ Origin: http://coolaf.com
 
 相比 websockets 库的结构，aiowebsocket 库的文件结构非常清晰，并且代码量很少。由于 websockets 库用的是 asyncio 旧语法，并且通过继承StreameProtocol 实现自定义协议，加上功能设计不明确（有很多不明确的预处理和 pending task 存在），所以导致它的结构比较混乱。
 
-整个 websockets 库的源码图我没有画出，但是在调试时候有绘制改进图，WebSocketsCOmmonProtocol 协议（改进草图）类似下图：
+整个 websockets 库的源码图我没有画出，但是在调试时候有绘制改进图，WebSocketsCommonProtocol 协议（改进草图）类似下图：
 
 ![images](https://github.com/asyncins/aiowebsocket/blob/master/images/WebSocketsCommonProtocol.png)
 
-这是协议的改进草稿，实际上源码的逻辑更为混乱，这也是导致我费尽心力设计一个新库的原因之一。
+这是仅仅协议的改进草稿，还不包括其他模块。实际上源码的逻辑更为混乱，这也是导致我费尽心力设计一个新库的原因之一。
 
 # WebSocket 及协议相关知识
 
