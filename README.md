@@ -9,7 +9,7 @@ AioWebSocket是一个遵循 WebSocket 规范的 异步 WebSocket 客户端，相
 
 ![images](https://github.com/asyncins/aiowebsocket/blob/master/images/aiowebsocket.jpg)
 
-```
+```markdown
 Why is it Lighter？
 Code volume just 30 KB
 Why is it Faster？
@@ -18,7 +18,7 @@ it is based on asyncio and asynchronous
 
 # Installation
 
-```
+```bash
 pip install aiowebsocket
 ```
 
@@ -29,7 +29,7 @@ The relationship between WSS and WS is just like HTTPS and HTTP.
 
 Now it can automatically recognize WS and WSS
 
-```
+```python
 import asyncio
 import logging
 from datetime import datetime
@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
 aiowebsocket just build a request header that meets the websocket standard, but some websites need to add additional information so that you can use a custom request header,like this:
 
-```
+```python
 import asyncio
 import logging
 from datetime import datetime
@@ -105,7 +105,7 @@ if __name__ == '__main__':
 ### union header
 Consider: because AIO provides the basic request header, and sometimes does not need to replace all the request headers, but only need to add or replace a field in the request header. So with the union_header parameter added, you can replace or add fields in the request header, such as Origin.
 
-```
+```python
 import asyncio
 import logging
 from datetime import datetime
@@ -141,7 +141,7 @@ With union, the request header information becomes：
 
 `# union_header = {'Origin': 'http://coolaf.com'}`
 
-```
+```bash
 # before
 GET /chat HTTP/1.1
 Host: server.example.com
@@ -150,7 +150,8 @@ Connection: Upgrade
 Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==
 Origin: Python/3.7
 ```
-```
+
+```bash
 # after
 GET /chat HTTP/1.1
 Host: server.example.com
